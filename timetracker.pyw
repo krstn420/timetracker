@@ -1,4 +1,5 @@
 from datetime import datetime
+from os.path import abspath, dirname
 from sqlite3 import OperationalError, connect
 from tkinter import (BOTTOM, CENTER, DISABLED, END, NO, NORMAL, SUNKEN, Button,
                      Entry, Frame, Label, StringVar, Tk, X, simpledialog)
@@ -6,7 +7,8 @@ from tkinter.ttk import Treeview
 
 
 class Timetracker:
-    database_name = "db\\timetracker" + datetime.now().strftime("%m%Y") + ".db"
+    path = dirname(abspath(__file__)) + "\\"
+    database_name = path + "db\\timetracker" + datetime.now().strftime("%m%Y") + ".db"
 
     START_BUTTON = "START_BUTTON"
     STOP_BUTTON = "STOP_BUTTON"
