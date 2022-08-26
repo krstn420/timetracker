@@ -1,0 +1,5 @@
+[tool.isort]
+supported_extensions = ["pyw", "ext"]
+
+[tool.black]
+include = '\.pyw?$'

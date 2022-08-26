@@ -2,7 +2,8 @@ from datetime import datetime
 from os.path import abspath, dirname
 from sqlite3 import OperationalError, connect
 from tkinter import (BOTTOM, CENTER, DISABLED, END, NO, NORMAL, SUNKEN, Button,
-                     Entry, Frame, Label, StringVar, Tk, X, simpledialog)
+                     Entry, Frame, Label, Scrollbar, StringVar, Tk, X,
+                     simpledialog)
 from tkinter.ttk import Treeview
 
 
@@ -19,7 +20,7 @@ class Timetracker:
                                 until_time = ?,
                                 comment = ?
                             WHERE id = ?"""
-    INSERT_TIMETRACKER = """INSERT INTO timetracker 
+    INSERT_TIMETRACKER = """INSERT INTO timetracker
                             (from_date, from_time)
                             VALUES (?,?)"""
     SELECT_TIMETRACKER = """SELECT * FROM timetracker"""
@@ -113,8 +114,18 @@ class Timetracker:
     def generate_table(self):
         result_set = self.db.execute(self.SELECT_TIMETRACKER)
 
+        # destory all children for refresh
+        for widget in self.table_frame.winfo_children():
+            widget.destroy()
+
         self.time_table = Treeview(self.table_frame)
-        self.time_table.grid(row=0, column=0)
+        self.time_table.pack(side="left")
+
+        vsb = Scrollbar(
+            self.table_frame, orient="vertical", command=self.time_table.yview
+        )
+        vsb.pack(side="right", fill="y")
+        self.time_table.configure(yscrollcommand=vsb.set)
 
         self.time_table["columns"] = (
             "ID",
