@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from os.path import abspath, dirname
 from sqlite3 import OperationalError, connect
 from tkinter import (BOTTOM, CENTER, DISABLED, END, NO, NORMAL, SUNKEN, Button,
@@ -40,6 +40,12 @@ class Timetracker:
                             WHERE id = ?"""
     DELETE_TIMETRACKER = """DELETE FROM timetracker
                             WHERE id = ?"""
+    SELECT_TIMETRACKER_TODAY = """SELECT from_date,
+                                        from_time,
+                                        until_date,
+                                        until_time
+                                    FROM timetracker
+                                   WHERE from_date = ?"""
 
     def __init__(self):
         # setup database
@@ -57,8 +63,16 @@ class Timetracker:
 
         statusvar = StringVar()
         statusvar.set(f"Database: {self.database_name}")
-        sbar = Label(self.root, textvariable=statusvar, relief=SUNKEN, anchor="w")
-        sbar.pack(side=BOTTOM, fill=X)
+        self.daily_time = StringVar()
+        self.daily_time.set("0:00:00")
+        sbar_frame = Frame(self.root)
+        sbar_west = Label(sbar_frame, textvariable=statusvar, relief=SUNKEN, anchor="w")
+        sbar_east = Label(
+            sbar_frame, textvariable=self.daily_time, relief=SUNKEN, anchor="e"
+        )
+        sbar_west.grid(row=0, column=0)
+        sbar_east.grid(row=0, column=1)
+        sbar_frame.pack(side=BOTTOM, fill=X)
 
         # setup tkinter buttons
         self.button_frame = Frame(self.root)
@@ -221,6 +235,27 @@ class Timetracker:
             comment.insert(0, values[5])
             self.buttons[self.UPDATE_BUTTON]["state"] = NORMAL
             self.buttons[self.DELETE_BUTTON]["state"] = NORMAL
+
+            cur = self.db.cursor()
+            result_set = cur.execute(self.SELECT_TIMETRACKER_TODAY, (values[1],))
+            time_array = []
+            for time_entry in result_set:
+                values = []
+                for j in range(len(time_entry)):
+                    values.append(time_entry[j])
+                time_array.append(values)
+
+            delta = timedelta()
+            for time_entry in time_array:
+                from_datetime = datetime.strptime(
+                    f"{time_entry[0]}  {time_entry[1]}", "%d.%m.%Y %H:%M"
+                )
+                until_datetime = datetime.strptime(
+                    f"{time_entry[2]}  {time_entry[3]}", "%d.%m.%Y %H:%M"
+                )
+                delta += until_datetime - from_datetime
+
+            self.daily_time.set(delta)
 
         # save Record
         def update_record():
