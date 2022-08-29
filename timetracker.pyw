@@ -5,6 +5,8 @@ from tkinter import (BOTTOM, CENTER, DISABLED, END, NO, NORMAL, SUNKEN, Button,
                      Entry, Frame, Label, Scrollbar, StringVar, Tk, X,
                      simpledialog)
 from tkinter.ttk import Treeview
+import mouse
+from random import randint
 
 
 class Timetracker:
@@ -93,6 +95,7 @@ class Timetracker:
 
         # setup tkinter clock
         self.update_clock()
+        self.move_mouse() # fix for tkinter win10 ;)
 
         # setup tkinter table
         self.table_frame = Frame(self.root)
@@ -116,6 +119,13 @@ class Timetracker:
 
     def exit_action(self):
         self.exit_tracking()
+
+    def move_mouse(self):
+        def rnd():
+            return str(randint(-1,1))
+
+        mouse.move(rnd(),0,False)
+        self.root.after(60*1000, self.move_mouse)
 
     def update_clock(self):
         if self.started_time:
